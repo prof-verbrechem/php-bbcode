@@ -27,30 +27,13 @@ class BBCode
   //  convert to lowercase and check against the alias list
   //  returns a named array with details about the tag
   static private function decode_tag($input) : array
-  {
-    // first determine if it's opening on closing tag, then substr out the inner portion
-    if ($input[1] === '/') {
-      $open = 0;
-      $inner = substr($input, 2, -1);
-    } else {
-      $open = 1;
-      $inner = substr($input, 1, -1);
-    }
-
-    // oneliner to burst inner by spaces, then burst each of those by equals signs
-    $params = array_map(
-      function(&$a) { return explode('=', $a, 2); },
-      explode(' ', $inner));
-
-    // first "param" is special - it's the tag name and (optionally) the default arg
-    $first = array_shift($params);
-
-    // tag name
-    $name = strtolower($first[0]);
-    if (isset(self::TAG_ALIAS[$name])) {
-      $name = self::TAG_ALIAS[$name];
-    }
-
+{
+  // Modify the closure to pass $a by reference
+  $params = array_map(
+    function(&$a) { return explode('=', $a, 2); },
+    explode(' ', $inner)
+  );
+}
     // "default" (unnamed) argument
     $args = null;
     if (isset ($first[1])) {
@@ -72,7 +55,7 @@ class BBCode
   static private function encode($input) : string
   {
     // break substring into individual unicode chars
-    $characters = preg_split('//u', $input, null, PREG_SPLIT_NO_EMPTY);
+    $characters = preg_split('//u', $input, -1, PREG_SPLIT_NO_EMPTY);
 
     // append each one-at-a-time to create output
     $lf = 0;
